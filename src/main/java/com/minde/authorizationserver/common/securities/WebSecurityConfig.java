@@ -1,5 +1,7 @@
 package com.minde.authorizationserver.common.securities;
 
+import com.minde.authorizationserver.common.securities.filters.CustomerFilter;
+import com.minde.authorizationserver.common.securities.provider.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -20,6 +23,8 @@ public class WebSecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailService;
+    @Autowired
+    private JwtProvider jwtProvider;
 
     @Bean
     public AuthenticationManager authManager(HttpSecurity http)
@@ -39,7 +44,7 @@ public class WebSecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.headers().frameOptions().disable(); //for H2 console
-
+        http.addFilterBefore(new CustomerFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 //        http.authorizeRequests().requestMatchers("/hello").hasRole("USER");
 //        http.authorizeHttpRequests((authz) -> authz.anyRequest().permitAll());
         return http.build();

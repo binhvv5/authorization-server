@@ -3,6 +3,7 @@ package com.minde.authorizationserver.common.utils;
 
 import com.minde.authorizationserver.common.advice.AuthenticationException;
 import com.minde.authorizationserver.common.consts.ExceptionConst;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import org.slf4j.MDC;
@@ -12,7 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 
-import javax.servlet.http.HttpServletRequest;
+
 import java.util.Locale;
 
 public class CommonUtil {
