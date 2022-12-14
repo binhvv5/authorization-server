@@ -1,0 +1,52 @@
+#Security
+UsernameOrPasswordNotFoundException:
+  code: "S00001"
+  msg: "ID or password does not match."
+
+ForbiddenException:
+  code: "S00002"
+  msg: "You do not have permission for this request."
+  
+UNAUTHORIZEDException:
+  code: "S00003"
+  msg: "Available after login."
+  
+ExpiredJwtException:
+  code: "S00004"
+  msg: "Your existing token has expired. Please take the token and go to the extend link."
+  
+ReLogin:
+  code: "S00005"
+  msg: "All tokens have expired. Please log in again."
+  
+SignatureException:
+  code: "S00006"
+  msg: "An invalid token. Please check again."
+
+RecoveryException:
+  code: "S00007"
+  msg: "Recovery link is not valid or expired"
+
+EmailNotFound:
+  code: "S00008"
+  msg: "Email not found"
+
+OldPasswordMatched:
+  code: "S00009"
+  msg: "Old password matched"
+
+CurrentPasswordNotMatch:
+  code: "S00010"
+  msg: "Current password not match"
+#Common
+SUCCESS:
+  code: "000000"
+  msg: "OK"
+  
+FAIL:
+  code: "000001"
+  msg: "ERROR"
+  
+InternalServerError:
+  code: "999999"
+  msg: "Server Error."
