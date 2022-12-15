@@ -9,11 +9,15 @@ import org.springframework.stereotype.Service;
 public class CommonService {
     private final RedisTemplate<String, String> redisTemplate;
 
-    public void cachingKeyValue(String key, String value){
-        redisTemplate.opsForValue().set(key,value);
+    public void cachingKeyValue(String key, String value) {
+        redisTemplate.opsForValue().set(key, value);
     }
 
-    public String getValueByKey(String key){
+    public String getValueByKey(String key) {
         return redisTemplate.opsForValue().get(key);
+    }
+
+    public boolean deleteValueByKey(String key) {
+        return Boolean.TRUE.equals(redisTemplate.delete(key));
     }
 }

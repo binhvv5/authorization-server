@@ -91,19 +91,14 @@ public class CustomerFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws jakarta.servlet.ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         MDC.put("trace.id", UUID.randomUUID().toString());
         MDC.put("log.cnt", "0");
         if (isAsyncDispatch(request)) {
 
             filterChain.doFilter(request, response);
         } else {
-
-            try {
-                doFilterWrapped(new ReadableRequestWrapper(request),new ResponseWrapper(response),filterChain);
-            } catch (ServletException e) {
-                e.printStackTrace();
-            }
+            doFilterWrapped(new ReadableRequestWrapper(request),new ResponseWrapper(response),filterChain);
         }
         logRequest(new ReadableRequestWrapper(request));
     }

@@ -1,23 +1,26 @@
 package com.minde.authorizationserver.services.auth.impl;
 
 import com.minde.authorizationserver.common.advice.AuthenticationException;
+import com.minde.authorizationserver.common.advice.CustomException;
 import com.minde.authorizationserver.common.consts.AuthorizationConst;
 import com.minde.authorizationserver.common.consts.ExceptionConst;
+import com.minde.authorizationserver.common.securities.filters.ReadableRequestWrapper;
 import com.minde.authorizationserver.common.securities.provider.JwtProvider;
-import com.minde.authorizationserver.dtoes.auth.LoginDTO;
-import com.minde.authorizationserver.dtoes.auth.LoginResponstDTO;
+import com.minde.authorizationserver.dtoes.auth.AuthenDTO;
 import com.minde.authorizationserver.services.auth.AuthenService;
 import com.minde.authorizationserver.services.common.CommonService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,19 +29,20 @@ public class AuthenServiceImpl implements AuthenService {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final CommonService commonService;
+    private final HttpServletRequest request;
 
     @Override
-    public LoginResponstDTO login(LoginDTO loginDto) {
+    public AuthenDTO.LoginResponseDTO login(AuthenDTO.LoginRequestDTO loginDto) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDto.getUserName(), loginDto.getPassword())
             );
 
-            Map<String, String> tokenParams = createTokenReturn(loginDto);
+            Map<String, String> tokenParams = createTokenReturn(loginDto.getUserName());
 
-            return LoginResponstDTO.builder()
+            return AuthenDTO.LoginResponseDTO.builder()
                     .userName(tokenParams.get(AuthorizationConst.Authorizations.USER_NAME.getName()))
-                    .refreshIdx(Long.parseLong(tokenParams.get(AuthorizationConst.Authorizations.REFRESH_INDEX.getName())))
+                    .refreshIdx(tokenParams.get(AuthorizationConst.Authorizations.REFRESH_INDEX.getName()))
                     .accessToken(tokenParams.get(AuthorizationConst.Authorizations.ACCESS_TOKEN.getName()))
                     .build();
         }catch (Exception e){
@@ -46,20 +50,34 @@ public class AuthenServiceImpl implements AuthenService {
         }
     }
 
-    private Map<String, String> createTokenReturn(LoginDTO loginDTO) {
+    @Override
+    public AuthenDTO.ExtendResponseDTO extend(AuthenDTO.ExtendRequestDTO extendDTO) {
+        String refreshToken = commonService.getValueByKey(extendDTO.getRefreshIdx());
+        if (jwtProvider.validateJwtToken(request, refreshToken)){
+            Map<String, String> tokenParams = createTokenReturn(extendDTO.getUserName());
+            commonService.deleteValueByKey(extendDTO.getRefreshIdx());
+            return AuthenDTO.ExtendResponseDTO.builder()
+                    .refreshIdx(tokenParams.get(AuthorizationConst.Authorizations.REFRESH_INDEX.getName()))
+                    .accessToken(tokenParams.get(AuthorizationConst.Authorizations.ACCESS_TOKEN.getName()))
+                    .build();
+        }else{
+            throw new CustomException("FAIL", "en");
+        }
+    }
+
+    private Map<String, String> createTokenReturn(String username) {
         Map<String, String> result = new HashMap<>();
 
-        result.put(AuthorizationConst.Authorizations.USER_NAME.getName(), loginDTO.getUserName());
+        result.put(AuthorizationConst.Authorizations.USER_NAME.getName(), username);
 
-        String accessToken = jwtProvider.createAccessToken(loginDTO);
-        Map<String, String> refreshTokenBean = jwtProvider.createRefreshToken(loginDTO);
-//        String refreshToken = refreshTokenBean.get(AuthorizationConst.Authorizations.REFRESH_TOKEN.getName());
-//        String refreshTokenExpirationAt = refreshTokenBean.get(AuthorizationConst.Authorizations.REFRESH_TOKEN_EXPIRATION.getName());
-
+        String accessToken = jwtProvider.createAccessToken(username);
+        Map<String, String> refreshTokenBean = jwtProvider.createRefreshToken(username);
         result.put(AuthorizationConst.Authorizations.ACCESS_TOKEN.getName(), accessToken);
-        result.put(AuthorizationConst.Authorizations.REFRESH_INDEX.getName(), "123");
 
-        commonService.cachingKeyValue(loginDTO.getUserName(), refreshTokenBean.get(AuthorizationConst.Authorizations.REFRESH_TOKEN.getName()));
+        String idxRefresh = UUID.randomUUID().toString();
+        result.put(AuthorizationConst.Authorizations.REFRESH_INDEX.getName(), idxRefresh);
+
+        commonService.cachingKeyValue(idxRefresh, refreshTokenBean.get(AuthorizationConst.Authorizations.REFRESH_TOKEN.getName()));
         return result;
     }
 

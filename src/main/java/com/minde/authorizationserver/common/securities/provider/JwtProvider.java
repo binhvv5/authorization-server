@@ -3,17 +3,16 @@ package com.minde.authorizationserver.common.securities.provider;
 
 import com.minde.authorizationserver.common.consts.AuthorizationConst;
 import com.minde.authorizationserver.common.securities.CustomUserDetailsService;
-import com.minde.authorizationserver.dtoes.auth.LoginDTO;
-import com.minde.authorizationserver.dtoes.auth.UserDTO;
+import com.minde.authorizationserver.dtoes.auth.AuthenDTO;
 import io.jsonwebtoken.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,12 +34,12 @@ public class JwtProvider {
 
     private final CustomUserDetailsService customUserDetailService;
 
-    public String createAccessToken(LoginDTO loginDTO) {
+    public String createAccessToken(String username) {
         Map<String, Object> headers = new HashMap<>();
         headers.put("type", "token");
 
         Map<String, Object> payloads = new HashMap<>();
-        payloads.put("userName", loginDTO.getUserName());
+        payloads.put("userName", username);
 //        payloads.put("userType", user.getUserType());
 
         Date expiration = new Date();
@@ -51,6 +50,7 @@ public class JwtProvider {
         return Jwts
                 .builder()
                 .setHeader(headers)
+                .setIssuer("AuthorizationServer")
                 .setClaims(payloads)
                 .setSubject("user")
                 .setExpiration(expiration)
@@ -58,12 +58,12 @@ public class JwtProvider {
                 .compact();
     }
 
-    public Map<String, String> createRefreshToken(LoginDTO loginDTO) {
+    public Map<String, String> createRefreshToken(String username) {
         Map<String, Object> headers = new HashMap<>();
         headers.put("type", "token");
 
         Map<String, Object> payloads = new HashMap<>();
-        payloads.put("userName", loginDTO.getUserName());
+        payloads.put("userName", username);
 
         Date expiration = new Date();
         expiration.setTime(expiration.getTime() + refreshExpireTime);
@@ -100,7 +100,7 @@ public class JwtProvider {
         return request.getHeader("token");
     }
 
-    public boolean validateJwtToken(ServletRequest request, String authToken) {
+    public boolean validateJwtToken(HttpServletRequest request, String authToken) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(authToken);
             return true;

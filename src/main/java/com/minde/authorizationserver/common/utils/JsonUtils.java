@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.logging.Level;
@@ -15,6 +16,8 @@ public class JsonUtils {
         ObjectMapper mapper = new ObjectMapper();
         String jsonString;
         try {
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
             jsonString = mapper.writeValueAsString(obj);
         } catch (JsonProcessingException ex) {
             Logger.getLogger(JsonUtils.class.getName()).log(Level.SEVERE, null, ex);

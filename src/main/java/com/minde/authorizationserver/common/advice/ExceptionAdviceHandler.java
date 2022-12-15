@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,7 +37,7 @@ public class ExceptionAdviceHandler {
         logger.addLogError("handleException Code : {}", basicResponseDto.getResponseCd());
         logger.addLogError("handleException Message : {}", basicResponseDto.getResponseMsg());
         logger.addLogDebug("handleException Entity : {}", basicResponseDto.toString());
-        logger.addLogError("handleException StackTrace :", exception);
+        logger.addLogError("handleException StackTrace :{}", exception.getMessage());
         return new ResponseEntity<>(basicResponseDto, HttpStatus.BAD_REQUEST);
 
     }
@@ -50,7 +51,7 @@ public class ExceptionAdviceHandler {
         logger.addLogError("handleNullPointerException Code : {}", basicResponseDto.getResponseCd());
         logger.addLogError("handleNullPointerException Message : {}", basicResponseDto.getResponseMsg());
         logger.addLogDebug("handleNullPointerException Entity : {}", basicResponseDto.toString());
-        logger.addLogError("handleNullPointerException StackTrace :", exception);
+        logger.addLogError("handleNullPointerException StackTrace :{}", exception.getMessage());
         return new ResponseEntity<>(basicResponseDto, HttpStatus.BAD_REQUEST);
     }
 
@@ -63,7 +64,7 @@ public class ExceptionAdviceHandler {
         logger.addLogError("HandleAuthenticationException Code : {}", basicResponseDto.getResponseCd());
         logger.addLogError("HandleAuthenticationException Message : {}", basicResponseDto.getResponseMsg());
         logger.addLogDebug("HandleAuthenticationException Entity : {}", basicResponseDto.toString());
-        logger.addLogError("HandleAuthenticationException StackTrace :", exception);
+        logger.addLogError("HandleAuthenticationException StackTrace :{}", exception.getMessage());
         return new ResponseEntity<>(basicResponseDto, HttpStatus.OK);
 
     }
@@ -77,7 +78,7 @@ public class ExceptionAdviceHandler {
         logger.addLogError("HandleCustomException Code : {}", basicResponseDto.getResponseCd());
         logger.addLogError("HandleCustomException Message : {}", basicResponseDto.getResponseMsg());
         logger.addLogDebug("HandleCustomException Entity : {}", basicResponseDto.toString());
-        logger.addLogError("HandleCustomException StackTrace :", exception);
+        logger.addLogError("HandleCustomException StackTrace :{}", exception.getMessage());
         return new ResponseEntity<>(basicResponseDto, HttpStatus.OK);
 
     }
@@ -91,7 +92,7 @@ public class ExceptionAdviceHandler {
         logger.addLogError("handleHttpRequestMethodNotSupportedException Code : {}", basicResponseDto.getResponseCd());
         logger.addLogError("handleHttpRequestMethodNotSupportedException Message : {}", basicResponseDto.getResponseMsg());
         logger.addLogDebug("handleHttpRequestMethodNotSupportedException Entity : {}", basicResponseDto.toString());
-        logger.addLogError("handleHttpRequestMethodNotSupportedException StackTrace :", exception);
+        logger.addLogError("handleHttpRequestMethodNotSupportedException StackTrace :{}", exception.getMessage());
         return new ResponseEntity<>(basicResponseDto, HttpStatus.BAD_REQUEST);
 
     }
@@ -105,9 +106,18 @@ public class ExceptionAdviceHandler {
         logger.addLogError("handleHttpMessageNotReadableException Code : {}", basicResponseDto.getResponseCd());
         logger.addLogError("handleHttpMessageNotReadableException Message : {}", basicResponseDto.getResponseMsg());
         logger.addLogDebug("handleHttpMessageNotReadableException Entity : {}", basicResponseDto.toString());
-        logger.addLogError("handleHttpMessageNotReadableException StackTrace :", exception);
+        logger.addLogError("handleHttpMessageNotReadableException StackTrace : {}", exception.getMessage());
         return new ResponseEntity<>(basicResponseDto, HttpStatus.OK);
 
     }
 
+    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ExceptionEntity> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
+        final ExceptionEntity infoPlusExceptionEntity = ExceptionEntity.of(ErrorCode.INVALID_INPUT_VALUE, exception.getBindingResult());
+        logger.addLogError("HandleMethodArgumentNotValid Message : {}", exception.getMessage());
+        logger.addLogDebug("HandleMethodArgumentNotValid Entity : {}", infoPlusExceptionEntity.toString());
+        logger.addLogError("HandleMethodArgumentNotValid StackTrace : {}", exception.getMessage());
+        return new ResponseEntity<>(infoPlusExceptionEntity, HttpStatus.OK);
+    }
 }

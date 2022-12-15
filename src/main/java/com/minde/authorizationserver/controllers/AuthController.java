@@ -1,12 +1,13 @@
 package com.minde.authorizationserver.controllers;
 
 import com.minde.authorizationserver.common.configs.properties.AuthorizationConfig;
-import com.minde.authorizationserver.dtoes.auth.LoginDTO;
-import com.minde.authorizationserver.dtoes.auth.LoginResponstDTO;
+import com.minde.authorizationserver.dtoes.auth.AuthenDTO;
 import com.minde.authorizationserver.services.auth.AuthenService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -23,8 +24,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponstDTO loginEndpoint(@RequestBody LoginDTO loginDto) {
+    public AuthenDTO.LoginResponseDTO loginEndpoint(@RequestBody @Valid AuthenDTO.LoginRequestDTO loginDto) {
         return authenService.login(loginDto);
+    }
+    @PostMapping("/extend")
+    public AuthenDTO.ExtendResponseDTO extendEndpoint(@RequestBody @Valid AuthenDTO.ExtendRequestDTO extendDTO){
+        return authenService.extend(extendDTO);
     }
 
     @GetMapping("/test")
