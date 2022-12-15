@@ -35,7 +35,6 @@ public class AuthenServiceImpl implements AuthenService {
             );
 
             Map<String, String> tokenParams = createTokenReturn(loginDto);
-            commonService.cachingKeyValue(loginDto.getUserName(), tokenParams.get(AuthorizationConst.Authorizations.ACCESS_TOKEN.getName()));
 
             return LoginResponstDTO.builder()
                     .userName(tokenParams.get(AuthorizationConst.Authorizations.USER_NAME.getName()))
@@ -60,6 +59,7 @@ public class AuthenServiceImpl implements AuthenService {
         result.put(AuthorizationConst.Authorizations.ACCESS_TOKEN.getName(), accessToken);
         result.put(AuthorizationConst.Authorizations.REFRESH_INDEX.getName(), "123");
 
+        commonService.cachingKeyValue(loginDTO.getUserName(), refreshTokenBean.get(AuthorizationConst.Authorizations.REFRESH_TOKEN.getName()));
         return result;
     }
 
