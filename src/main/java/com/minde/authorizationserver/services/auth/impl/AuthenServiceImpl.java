@@ -37,17 +37,17 @@ public class AuthenServiceImpl implements AuthenService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDto.getUserName(), loginDto.getPassword())
             );
-
-            Map<String, String> tokenParams = createTokenReturn(loginDto.getUserName());
-
-            return AuthenDTO.LoginResponseDTO.builder()
-                    .userName(tokenParams.get(AuthorizationConst.Authorizations.USER_NAME.getName()))
-                    .refreshIdx(tokenParams.get(AuthorizationConst.Authorizations.REFRESH_INDEX.getName()))
-                    .accessToken(tokenParams.get(AuthorizationConst.Authorizations.ACCESS_TOKEN.getName()))
-                    .build();
         }catch (Exception e){
             throw new AuthenticationException(ExceptionConst.Constants.USERNAME_OR_PASSWORD_NOT_FOUND_EXCEPTION.getId());
         }
+
+        Map<String, String> tokenParams = createTokenReturn(loginDto.getUserName());
+
+        return AuthenDTO.LoginResponseDTO.builder()
+                .userName(tokenParams.get(AuthorizationConst.Authorizations.USER_NAME.getName()))
+                .refreshIdx(tokenParams.get(AuthorizationConst.Authorizations.REFRESH_INDEX.getName()))
+                .accessToken(tokenParams.get(AuthorizationConst.Authorizations.ACCESS_TOKEN.getName()))
+                .build();
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.minde.authorizationserver.common.utils.LogUtil;
 import com.minde.authorizationserver.dtoes.BasicResponseDto;
 import com.minde.authorizationserver.services.common.ResponseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -32,7 +33,7 @@ public class ExceptionAdviceHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<BasicResponseDto> handleException(Exception exception) {
 
-        BasicResponseDto basicResponseDto = responseService.getFailResult("FAIL", "en");
+        BasicResponseDto basicResponseDto = responseService.getFailResult("InternalServerError", "en");
 
         logger.addLogError("handleException Code : {}", basicResponseDto.getResponseCd());
         logger.addLogError("handleException Message : {}", basicResponseDto.getResponseMsg());
@@ -46,7 +47,7 @@ public class ExceptionAdviceHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<BasicResponseDto> handleNullPointerException(NullPointerException exception) {
 
-        BasicResponseDto basicResponseDto = responseService.getFailResult("FAIL", "en");
+        BasicResponseDto basicResponseDto = responseService.getFailResult("InternalServerError", "en");
 
         logger.addLogError("handleNullPointerException Code : {}", basicResponseDto.getResponseCd());
         logger.addLogError("handleNullPointerException Message : {}", basicResponseDto.getResponseMsg());
@@ -119,5 +120,17 @@ public class ExceptionAdviceHandler {
         logger.addLogDebug("HandleMethodArgumentNotValid Entity : {}", infoPlusExceptionEntity.toString());
         logger.addLogError("HandleMethodArgumentNotValid StackTrace : {}", exception.getMessage());
         return new ResponseEntity<>(infoPlusExceptionEntity, HttpStatus.OK);
+    }
+
+    @ExceptionHandler({RedisConnectionFailureException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<BasicResponseDto> handleRedisConnectionFailureException(RedisConnectionFailureException exception) {
+
+        BasicResponseDto basicResponseDto = responseService.getFailResult("RedisConnectionFail", "en");
+        logger.addLogError("handleNullPointerException Code : {}", basicResponseDto.getResponseCd());
+        logger.addLogError("handleNullPointerException Message : {}", basicResponseDto.getResponseMsg());
+        logger.addLogDebug("handleNullPointerException Entity : {}", basicResponseDto.toString());
+        logger.addLogError("handleNullPointerException StackTrace :{}", exception.getMessage());
+        return new ResponseEntity<>(basicResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

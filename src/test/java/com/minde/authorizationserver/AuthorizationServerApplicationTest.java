@@ -23,11 +23,11 @@ public class AuthorizationServerApplicationTest {
 
     @Test
     void testMappingUser(){
-        TbdUser tbdUser = new TbdUser();
-        tbdUser.setUsername("binhvv");
-        tbdUser.setPassword("12345");
-
-        UserDTO userDTO = tbdUserMapper.toDto(tbdUser);
-        assert userDTO.getUsername()!=null;
+//        TbdUser tbdUser = new TbdUser();
+//        tbdUser.setUsername("binhvv");
+//        tbdUser.setPassword("12345");
+//
+//        UserDTO userDTO = tbdUserMapper.toDto(tbdUser);
+//        assert userDTO.getUsername()!=null;
     }
 }

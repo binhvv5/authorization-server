@@ -50,3 +50,7 @@ FAIL:
 InternalServerError:
   code: "999999"
   msg: "Server Error."
+
+RedisConnectionFail:
+  code: "000002"
+  msg: "Redis Server Connection Fail."
